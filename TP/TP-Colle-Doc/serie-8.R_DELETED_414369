@@ -1,0 +1,90 @@
+read.csv("apnee.csv")->apnee
+head(apnee)
+summary(apnee)
+hist(apnee$poids)
+prop.table(table(apnee$age,apnee$sexe),1)
+#ex1&2
+#########
+
+#question 1
+poidsh<-apnee[apnee$sexe==0,"poids"]#ech poids des hommes
+mean(poidsh)
+
+poidsf<-apnee[apnee$sexe==1,"poids"]#ech poids des femmes
+mean(poidsf)
+#question 2 :
+#chez les femmes
+qqnorm(poidsf)
+abline(mean(poidsf),sd(poidsf),col=2) #dte de Henry et alignement OK ==> modele gauss OK
+#modèle : X poids d'une femme de loi normale de parametres muf et sigf inconnus
+#hypothèse de test : H0: muf=70 contre H1: muf>70
+t.test(poidsh,mu=70,alternative="greater")#
+
+#chez les hommes
+qqnorm(poidsh)
+abline(mean(poidsh),sd(poidsh),col=2) #dte de Henry et alignement OK (sauf qqs extr) ==> modele gauss OK
+#modèle : Y poids d'une femme de loi normale de parametres muh et sigh inconnus
+#hypothèse de test : H0: muh=80 contre H1: muh>80
+t.test(poidsh,mu=80,alternative="greater")#
+
+#questions supplémentaire
+##############################
+#comparaison des deux moyennes
+#modèle : ech indep avec X et Y comme précedemment def + X et Y indep +sigh=sigf
+#cette dernière hypothèse pouvvant être validée avec var.test
+var.test(poidsh,poidsf) #à moins d'un risque > à 80,35% on ne refuse pas l'égalité des var
+#test de comp de moyennes : H0: muh=muf contre H1: muh=\=muf
+t.test(poidsf,poidsh, var.equal=T)
+#on ne peut pas conclure qu'en moyenne sur cette pop.
+#le poids d'un homme différe de celui d'une femme (à moins de prendre un risque>73,9%)
+
+#Ex3&4
+#question 1
+tailleg<-apnee[apnee$taille>180,"taille"]#ech de taille  des grands
+taillep<-apnee[apnee$taille<=180,"taille"]#ech de taille  des petits
+
+#question 2
+qqnorm(tailleg)
+abline(mean(tailleg),sd(tailleg),col=2)#à part un indiv extreme Ok
+#modèle : X taille d'un grand (>180) de loi normale de parametres mug et sigg inconnus
+#hypothèse de test : H0: mug=190 contre H1: mug>190
+t.test(tailleg,mu=190,alternative="greater")#on conclut que la taille moyenne des grands
+# dépasse 190 en moyenne avec un risque d'erreur >4%
+qqnorm(taillep)
+abline(mean(taillep),sd(taillep),col=2)#à peu près OK n=44
+#modèle : Y taille d'un petie (<=180) de loi normale de parametres mup et sigp inconnus
+#hypothèse de test : H0: mup=190 contre H1: mup<170
+t.test(taillep,mu=170,alternative="less")#on conclut que la taille moyenne des petits 
+#est inférieure à 170 avec un risque > à 0,7%
+
+#Ex 5&6
+########
+#question 1
+#############
+(echapneesa<-apnee[apnee$alcool==0,"apnee"])#echa de apnee chez les alcool==0
+(echapneeaa<-apnee[apnee$alcool>0,"apnee"])#ech de apnee chez les alcool>0
+
+#question 2
+###########
+
+#modèle : Bernoulli de paramètre paa pour les alcool>0
+mean(echapneeaa)->paaest#estimation de paa
+#verfification des conditions de taille d'éch pour faire test :
+length(echapneeaa)*paaest # OK
+length(echapneeaa)*(1-paaest) # OK
+#hypothèse de test : H0: paa=0.15 contre H1: paa>0.15
+prop.test(sum(echapneeaa),length(echapneeaa),p=0.15,correct=F,conf.level=0.9,alternative="greater")
+#pour tout  risque d'erreur  supérieur à 10^-10 on concluera que le risque de faire de l'apnee
+# est supérieur au risque habituel
+
+#modèle : Bernoulli de paramètre psa pour les sans alcool
+mean(echapneesa)->psaest#estimation de paa
+#verfification des conditions de taille d'éch pour faire test :
+length(echapneesa)*psaest #limite ce devrait être >10
+length(echapneesa)*(1-psaest) # OK
+#hypothèse de test : H0: paa=0.15 contre H1: paa>0.15
+prop.test(sum(echapneesa),length(echapneesa),p=0.15,correct=F,conf.level=0.9,alternative="greater")
+#à moins de le faire un risque de se tromper d'au moins 12% on ne pourra pas conclure
+#que sur cette pop le risque de faire de l'apnee n'est superieur au risque habituel
+
+

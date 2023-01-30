@@ -1,0 +1,28 @@
+# EX3-4-5-6 les EX1 et EX2 faits en
+a<-10
+N<-1000000
+n<-20
+dataU<-matrix(runif(n*N,min=0,max=a),ncol=n)
+echT1<-rowMeans(dataU)*2
+echT2<-apply(dataU,1,max)
+echT3<-echT2*(n+1)/n
+
+# EX3
+mean(echT1)-a # approche le biais de T1 pour N grand soit : E(T1)-a
+mean(echT2)-a # approche  biais de T1 soit : E(T2)-a ==> biais non nul
+mean(echT3)-a # approche biais de T1 soit : E(T3)-a ==> biais  nul
+
+# EX4
+var(echT1)-a^2/(3*n) #approche l'écart entre var(T1) et a^2/(3*n) pour N grand : on observe que l'écart tend vers 0 si N tend vers l'infini
+var(echT2)-a^2*n/((n+2)*(n+1)^2)#même remarque que pour T1
+
+# EX5
+hist(echT1,freq=F) #répartition observée de T1
+curve(dnorm(x,a,sqrt(a^2/(3*n))),add=T,col=2)#loi asymptotique théorique de T1 qui est parfaitement approchée par l'hist
+
+# EX6 
+alpha=0.05
+u<-qnorm(1-alpha/2)
+Binf<-echT1*sqrt(3*n)/(sqrt(3*n)+u)
+Bsup<-echT1*sqrt(3*n)/(sqrt(3*n)-u)
+mean((Binf<a)&(Bsup>a))

@@ -1,0 +1,280 @@
+
+#--------chargement des données -------
+#####################################################################################
+data<-mtcars
+head(data)
+summary(data)
+attach(data)
+###################################################
+#------------Exercice 1-----------------------
+###################################################
+#--------question 1-------
+cyl
+mpg
+par(mfrow=c(1,2))
+barplot(table(cyl)/length(cyl),main="répartition du nombre de cylindres",xlab="nb cyl.")
+hist(mpg,prob=T,main="répartition observée de la consommation", xlab="nbre de miles")
+#--------question 2-------
+table(cyl)#tableau en effectifs
+2*table(cyl) #si on double les effectifs : attention les modalités testent 4 6 et 8 
+names(table(cyl))#liste des modalités (affichées en xlab dans le barplot)
+dist0<-c(1/3,1/3,1/3)#distribution théorique testée soit l'uniforme
+(table(cyl)->effobs)
+(length(cyl)*dist0->efftheo)
+(tcalc<-sum((effobs-efftheo)^2/efftheo))#statistique du test H0: loi de cyl=dist0 ctre H1 : loi differente
+(pval=1-pchisq(tcalc,2))#rien de significatif ne permet de rejeter le modèle uniforme car pval>30%
+chisq.test(effobs,p = dist0)#on retrouve tcalc dans X-squared et la p-val
+#rien ne permer de rejeter un modèle uniforme mais essayons une autre distribution cible
+#--------question 3-------
+dist1<-c(0.35,0.2,0.45)
+chisq.test(effobs,p=dist1) #meilleure que l'uniforme car 0.9652>>0.30 !
+#--------question 4-----------
+par(mfrow=c(1,2))
+hist(mpg,prob=T,main="répartition observée de la consommation", xlab="nbre de miles")
+seq(min(mpg),max(mpg),1)->abs
+points(abs,dnorm(abs,mean(mpg),sd(mpg)),col=2,type="l")
+qqnorm(mpg)
+abline(mean(mpg),sd(mpg),col=2) #modèle qui semble raisonnable
+#--------question 5-----------
+#avec les classes [10,15[,[15,20[, [20,25[, [25,30] et [30,35[ :
+####################
+(biclasse<-seq(10,30,5))
+(bsupclasse<-seq(15,35,5))
+matrix(rep(mpg,5),ncol=5)<matrix(rep(bsupclasse,length(mpg)),ncol=5,byrow=T)->MTEST
+#test dans chaque colonne i un mpg inférieur à la borne sup de la classe i
+(apply(MTEST,MARGIN=2,sum)->cumeffobs) #(remarquer que tous les effctifs sont > à 5)
+effobs<-cumeffobs-c(0,cumeffobs[1:4])
+#calculs des proba théoriques puis des effectifs théoriques
+(pnorm(bsupclasse,mean(mpg),sd(mpg))-pnorm(biclasse,mean(mpg),sd(mpg))->probtheo)
+sum(probtheo) #sur [10,35] on perd un peu de masse environ 5% ici corrigeons avec
+probtheo[1]<-pnorm(15,mean(mpg),sd(mpg))
+probtheo[5]<-1-pnorm(30,mean(mpg),sd(mpg))
+sum(probtheo)
+(probtheo*length(mpg)->efftheo)
+(tcalc<-sum((effobs-efftheo)^2/efftheo))
+# statistique du test H0:mpg suit une normale H1: ne suit pas une normale.
+(pval<-1-pchisq(tcalc,2)) #df=nb classes - nb para estimés -1 donc ici 5-2-1=2
+chisq.test(effobs,p=probtheo)#en effet certains eff theo sont inferieurs à 5 et R le signale 
+#la p-val est de 12% on ne rejette pas le modèle gaussien mais il n'est pas idéal non plus.
+
+#attention la p-val est calculée pour nbre de classe - 1 degré de liberté car le logiciel
+#ne sait pas que les paramètres de la loi cible sont estimés et il prend un chi-deux à 4 df
+#ce qui ne convient pas ici. On devrait calculer  la p-valeur du test à la main
+#avec :
+(chisq.test(effobs,p=probtheo)$statistic->tcalc)
+(pval<-1-pchisq(tcalc,4))
+#Le test stadard  de normalité utilisé en pratique est plutôt
+#celui de Shapirio Wilks 
+shapiro.test(mpg) #qui retourne aussi 12% de pval
+#on acceptera le modèle gaussien (faute de mieux!)
+
+###################################################
+#------------Exercice 2-----------------------
+###################################################
+
+#--------question 1-------
+hp
+hpc<-hp-50
+#--------question 2-------
+par(mfrow=c(1,1))
+hist(hpc,prob=T,main="répartition observée de la puissance décalée de 50",xlab="hp-50",ylim=c(0,0.01))
+abs<-seq(0,300,1)
+points(abs,dnorm(abs,mean(hpc),sd(hpc)),type="l",col=2)#densité gaussienne
+points(abs,dexp(abs,1/mean(hpc)),type="l",col=3)#densité exponentielle
+#--------question 3-----
+#la verte semble meilleure mais à vérifier avec le chideux en utilisant
+#les six classes proposées par R
+(biclasse<-seq(0,250,50))
+(bsupclasse<-seq(50,300,50))
+matrix(rep(hpc,6),ncol=6)<matrix(rep(bsupclasse,length(hpc)),ncol=6,byrow=T)->MTEST
+#test dans chaque colonne i un mpg inférieur à la borne sup de la classe i
+(apply(MTEST,MARGIN=2,sum)->cumeffobs) #(remarquer que tous les effetifs sont bien > à 5)
+(effobs<-cumeffobs-c(0,cumeffobs[1:5]))
+#calculs des proba théoriques avec le modèle normal puis des effectifs théoriques
+(pnorm(bsupclasse,mean(hpc),sd(hpc))-pnorm(biclasse,mean(hpc),sd(hpc))->probtnorm)
+sum(probtnorm) #sur [10,35] on perd un peu de masse environ 5% ici corrigeons avec
+probtnorm[1]<-pnorm(50,mean(hpc),sd(hpc))
+probtnorm[6]<-1-pnorm(250,mean(hpc),sd(hpc))
+sum(probtnorm)
+probtnorm*length(hpc)#effectifs théoriques
+effobs
+chisq.test(effobs,p=probtnorm) #on ne rejette pas le modèle normal
+#attention certains effectifs théoriques sont >5 : il faudrait reunir les trouis dernières classes
+effobs[4]<-sum(effobs[4:6])
+probtnorm[4]<-sum(probtnorm[4:6])
+chisq.test(effobs[1:4],p=probtnorm[1:4])#la c'est très clair on peut utiliser le modèle normal.
+
+#Voyons ce qu'il en est pour le modèle exponentiel calculons les proba théorique avec exp
+bsupclasse<-c(50,100,150,300)
+biclasse<-c(0,50,100,150)
+(pexp(bsupclasse,1/mean(hpc))-pexp(biclasse,1/mean(hpc))->probtexp)
+sum(probtexp) #sur [0,300] on perd un peu de masse environ 4,5% ici corrigeons avec
+probtexp[1]<-pexp(50,1/mean(hpc))
+probtexp[4]<-1-pexp(150,1/mean(hpc))
+sum(probtexp)
+probtexp*length(hpc)#effectifs théoriques
+effobs[1:4] #attention on s'arrete aux 4 premières classes puisqu'on a réuni les dernières
+chisq.test(effobs[1:4],p=probtexp) #on ne rejette pas le modèle exponentiel 
+#mais le modèle gaussien est bien meilleur puisque rappelons 
+chisq.test(effobs[1:4],p=probtnorm[1:4])
+########################################################################################
+#Conclusion de l'etude on conservera la modélisation normale plutôt qu'exponentielle  ##
+########################################################################################
+
+###################################################
+#------------Exercice 3-----------------------
+###################################################
+
+#--------question 1-------
+(mpga<-data[am==0,"mpg"])#echantillon de mpg sur véhicules automatiques
+(mpgm<-data[am==1,"mpg"])#echantillon de mpg sur véhicules manuels
+#--------question 2---------
+boxplot(mpga,mpgm,main="boxplots de mpg selon boite de vitesse",names=c("automatique","manuelle")) #beaucoup plus de dispersion dans les grandes valeurs chez les hommes que chez
+#--------question 3---------
+par(mfrow=c(2,1))
+hist(mpga,prob=T,xlim=c(10,35),ylim=c(0,0.13),main="mpg pour les automatiques")
+hist(mpgm,prob=T,xlim=c(10,35),ylim=c(0,0.13),main="mpg pour les manuelles")
+#deux répartitions qui semblent différentes autant par leurs paramètres de centarges (les moyennes)
+#que par l'allure générales des répartitions observées
+#--------question 4---------
+#test de comparaison des variances : H0 : vartheo(mgga)=vartheo(mpgm) H1 : var. théo. différentes
+par(mfrow=c(1,2))
+qqnorm(mpga, main="conso pour un véhicule automatique")
+abline(mean(mpga),sd(mpga),col=2)
+qqnorm(mpgm, main="conso pour un véhicule manuel")
+abline(mean(mpgm),sd(mpgm),col=2)
+#OK pour la normalité de chaque variable
+var.test(mpgm,mpga)
+#pour un niveau de 5% on ne rejette pas l'égalité. On peut donc faire
+#le test de comparaison de moyennes avec variances égales
+t.test(mpgm,mpga,var.equal=T) #en moyenne il y a un effet que l'on valide de façon signif (pval faible)
+t.test(mpgm,mpga) #en supposant les variances différentes moins significatif mais pval < 0.1%<<10%
+#attention aux tailles d'échantillons
+length(mpga) #taille limite pour utiliser des variance différentes
+length(mpgm) #taille encore plus  limite ici
+###############################
+# En moyenne les réaprtiations diffèrent donc les deux ecantillons ne sont pas tirés d'une même
+# population : il y a un effet de la boite de vitesse
+#################################
+#--------question 5---------
+#test : de H0 : FdRth de conso d'un vehicule automatque = FdRth de conso Vehi manuel
+#H1 : le contraire
+#Effectuons les calculs d'effectifs sur les classes [10,15[,[15,20[,[20,25[,[25,30[ et [30,35[
+bic<-c(10,15,20,25,30)
+bis<-c(15,20,25,30,35)
+#effectifs observés pour mpgm
+(matrix(rep(mpgm,5),ncol=5)<matrix(rep(bis,length(mpgm)),ncol=5,byrow=T)->MTESTm)
+#test dans chaque colonne i un mpgm inférieur à la borne sup de la classe i
+(apply(MTESTm,MARGIN=2,sum)->cumeffobs.m) #(remarquer que tous les effetifs sont bien > à 5)
+(effobs.m<-cumeffobs.m-c(0,cumeffobs.m[1:4]))
+#effectifs observés pour mpga
+(matrix(rep(mpga,5),ncol=5)<matrix(rep(bis,length(mpga)),ncol=5,byrow=T)->MTESTa)
+#test dans chaque colonne i un mpgm inférieur à la borne sup de la classe i
+(apply(MTESTa,MARGIN=2,sum)->cumeffobs.a) #(remarquer que tous les effetifs sont bien > à 5)
+(effobs.a<-cumeffobs.a-c(0,cumeffobs.a[1:4]))
+
+#les tabeaux de contingence (effectifs observés) et des ed=ffectifs attendus
+############################################################################
+rbind(effobs.m,effobs.a)->contingence#tableau des n_{kl} effectif de hp dans  classe l modalité 1 de am 
+(effmargl<-effobs.m+effobs.a)# effectifs totaux en colonnes.
+(effmargc<-apply(rbind(effobs.m,effobs.a),MARGIN=1,sum))#effectifs totaux  en ligne
+(rbind(effmargl*effmargc[1],effmargl*effmargc[2])/sum(effobs.m,effobs.a)->attendu)
+(tcalc=sum((contingence-attendu)^2/attendu))
+(pval=1-pchisq(tcalc,4))
+chisq.test(contingence) #attention certains effectiofs attendus sont <à 5
+#l'approximation par un chi-deux peut etre douteuse.
+
+##############################################################################
+# En tout cas la p-val faible permet de conclure avec risque d'erreur faible
+# qu'il y a dépendance entre boite et conso,
+############################################################################## 
+
+
+#   Exercice 4
+######################
+(mpg4<-data[cyl==4,"mpg"])
+(mpg6<-data[cyl==6,"mpg"])
+(mpg8<-data[cyl==8,"mpg"])
+par(mfrow=c(1,1))
+boxplot(mpg4,mpg6,mpg8)#plus il y a de cylindre plus la consommation est grande car mpq petit
+#on dirait que les echantillons mpg6 et mpg8 ont même variance mais pas mpg6 et mpg4
+#ni mpg8 et mpg4. A noter une valeur très basse en mpg8.
+data[which((mpg<12)&(cyl==8)),] #deux vehicules en fait 
+par(mfrow=c(1,3))
+qqnorm(mpg4,main="conso.  moteur  4 cyl.")
+abline(mean(mpg4),sd(mpg4),col=2)
+qqnorm(mpg6,main="conso.  moteur  6 cyl.")
+abline(mean(mpg6),sd(mpg6),col=2)
+qqnorm(mpg8,main="conso.  moteur  8 cyl.")
+abline(mean(mpg8),sd(mpg8),col=2)
+#à peu près gaussien on le testera de préférence avec Shapiro qu'avec le chi-deux
+shapiro.test(mpg4)#ok
+shapiro.test(mpg6)#ok
+shapiro.test(mpg8)#ok
+
+#Si on compare mpg6 et mpg8
+#########################
+var.test(mpg6,mpg8) #on peut supposer l'égalité des variances entre 6 et 8 cylindre
+t.test(mpg6,mpg8) #les moyennes sont significativement différentes
+#Si on enlève les deux véhicules extrêmes à 8 cylindres
+shapiro.test(mpg6)#ok
+shapiro.test(mpg8[-which(mpg8==10.4)])#ok encore plus proche de la normalité que mpg8 complet
+var.test(mpg8[-which(mpg8==10.4)],mpg6) #variance égales
+t.test(mpg8[-which(mpg8==10.4)],mpg6) #confirme la différence de conso en moyenne entre 6 et  8 cyl
+
+
+#Si on compare mpg6 et mpg4
+###########################
+
+#comparaison des moyennes
+##########################
+
+var.test(mpg6,mpg4) #on ne peut supposer l'égalité des variances entre 6 et 4 cylindre
+t.test(mpg6,mpg4,var.equal=F) #les moyennes sont significativement différentes
+# attention les tailles d'échantillons sont faibles, et l'hyp d'égalité des variances serait
+# préférable :
+t.test(mpg6,mpg4,var.equal=T) #un effet moyen qui reste significativement dépendant du nbre de cyl"
+
+
+
+#comparaison des répartitions
+#############################
+par(mfrow=c(1,3))
+hist(mpg4,prob=T,xlim=c(10,34),ylim=c(0,0.28))
+hist(mpg6,prob=T,xlim=c(10,34),ylim=c(0,0.28))
+hist(mpg8,prob=T,xlim=c(10,34),ylim=c(0,0.28))
+#une grande variabilité des distributions observées qui indiquent une dépendance forte entre
+#mpg et cyl. Utilisons de nouveau les 5 classes  [10,15[,[15,20[,[20,25[,[25,30[ et [30,35[
+bic<-c(10,15,20,25,30)
+bis<-c(15,20,25,30,35)
+
+
+#effectifs observés pour mpg4
+(matrix(rep(mpg4,5),ncol=5)<matrix(rep(bis,length(mpg4)),ncol=5,byrow=T)->MTEST4)
+#test dans chaque colonne i un mpg4 inférieur à la borne sup de la classe i
+(apply(MTEST4,MARGIN=2,sum)->cumeffobs4) #(remarquer que tous les effetifs sont bien > à 5)
+(effobs4<-cumeffobs4-c(0,cumeffobs4[1:4]))
+
+#effectifs observés pour mpg6
+(matrix(rep(mpg6,5),ncol=5)<matrix(rep(bis,length(mpg6)),ncol=5,byrow=T)->MTEST6)
+#test dans chaque colonne i un mpg6 inférieur à la borne sup de la classe i
+(apply(MTEST6,MARGIN=2,sum)->cumeffobs6) #(remarquer que tous les effetifs sont bien > à 5)
+(effobs6<-cumeffobs6-c(0,cumeffobs6[1:4]))
+
+#effectifs observés pour mpg8
+(matrix(rep(mpg8,5),ncol=5)<matrix(rep(bis,length(mpg8)),ncol=5,byrow=T)->MTEST8)
+#test dans chaque colonne i un mpg6 inférieur à la borne sup de la classe i
+(apply(MTEST8,MARGIN=2,sum)->cumeffobs8) #(remarquer que tous les effetifs sont bien > à 5)
+(effobs8<-cumeffobs8-c(0,cumeffobs8[1:4]))
+
+#tableau de contingence
+#######################
+(contingence.mpg_cyl<-rbind(effobs4,effobs6,effobs8))
+chisq.test(contingence.mpg_cyl) # il y a une dépendance forte entre cyl et mpg puisque pval tres petite
+#attention néanmoins le test suppose une approxiamtion qui peut être erronée car
+#de nombreux effectifs attendus sont inférieurs à 5, en effet :
+chisq.test(contingence.mpg_cyl)$expected
+
+##########################################################################
+# CONCLUSION : DEPENDANCE FORTE ENTRE CONSO ET NBRE DE CYLINDRES MOTEUR ##
+##########################################################################
