@@ -23,7 +23,7 @@ dnorm(2 + 2 * 3, 2, 3) - dnorm(2 - 2 * 3, 2, 3)
 # Soit n = 9, calculer les quantiles d’ordres 1/(n + 1),2/(n + 1),....,n/(n + 1) de la variable U. Il
 # s’agit des d ́eciles (ils sont neuf et coupent la droite r ́elle en dix intervalles tels que la probabilit ́e de
 # se trouver X dans chacun de ces intervalles vaille 10%. Les retrouver sur les tables statistiques
-dnorm(qnorm(1 / (9 + 1)), 0, 1)
+qnorm(seq(1 / (9 + 1), 9 / (9 + 1), length.out = 9))
 
 # Tracer la fonction de r ́epartition de U et marquer par des points rouges sur l’axe des abscisses les
 # positions des quantiles pr ́ec ́edemment calcul ́es. Placer sur l’axe des ordonn ́ees des points rouges
@@ -57,3 +57,5 @@ dnorm(5, 2, 3) - dnorm(1, 2, 3) / dnorm(0, 2, 3)
 # Retrouver la valeur de P(A) en utilisant la formule des probabilit ́es totales appliqu ́ees avec la
 # partition (B,C,D) de l’univers de tous les possibles Ω.
 dnorm(5, 2, 3) - dnorm(1, 2, 3) / (dnorm(2, 2, 3) + dnorm(Inf, 2, 3) - dnorm(2, 2, 3) + dnorm(0, 2, 3))
+
+
