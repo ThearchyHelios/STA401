@@ -1,0 +1,30 @@
+(mu <- 3)
+(sigma <- 1)
+(n <- 10)
+(N <- 1000)
+dataG <- matrix(rnorm(n * N, mu, sigma), ncol = n, byrow = T)
+dim(dataG)
+
+est1 <- rowMeans(dataG)
+length(est1)
+est2 <- (apply(dataG, MARGIN = 1, min) + apply(dataG, MARGIN = 1, max)) / 2
+length(est2)
+
+(moyest1 <- mean(est1))
+(etest1 <- sd(est1))
+(moyest2 <- mean(est2))
+(etest2 <- sd(est2))
+
+par(mfrow = c(1, 1))
+hist(est1, prob = T, main = "Répartition observée", ylim = c(0, 1.1 * dnorm(mu, mu, sigma / sqrt(n))), xlim = c(0.9 * min(est1), max(est1) * 1.1))
+abs <- seq(mu - 3 * sigma / sqrt(n), mu + 3 * sigma / sqrt(n), 0.01)
+points(abs, dnorm(abs, mean(est1), sd(est1)), col = 2, type = "l")
+abline(v = mu, col = 2)
+abline(v = moyest1, lty = "dashed", col = 3)
+
+par(mfrow = c(2, 1))
+hist(est1, prob = T, main = "Répartition observée de T1", ylim = c(0, 1.1 * dnorm(mu, mu, sigma / sqrt(n))), xlim = c(.9 * min(est1), max(est1) * 1.1))
+abs <- seq(mu - 3 * sigma / sqrt(n), mu + 3 * sigma / sqrt(n), 0.01)
+points(abs, dnorm(abs, mean(est1), sd(est1)), col = 2, type = "l")
+abline(v = mu, col = 2)
+abline(v = moyest1, lty = "dashed", col = 3)

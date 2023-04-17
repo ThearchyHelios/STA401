@@ -1,0 +1,103 @@
+---
+title: "TP Note"
+author: "Yilun JIANG"
+date: "2023-03-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Sujet 5
+
+## Exercice 1
+
+taille affectee a `nx`
+
+
+```{r}
+nx <- read.csv("diamantsPurs.csv")
+```
+
+Moyenne affectee a `mx`
+
+```{r}
+mx <- mean(nx)
+```
+
+Variance empirique affectee a `vx`
+
+```{r}
+vx <- var(nx)
+```
+
+Variance empirique corrigee affectee a `vex`
+
+```{r}
+vex <- var(nx, na.rm = TRUE)
+```
+
+Ecart type empirique corrigee affectee a `sdex`
+
+```{r}
+sdex <- sqrt(vex)
+```
+
+Quartiles affectes a `q1`, `q2`, `q3`
+
+```{r}
+q1 <- quantile(nx, 0.25)
+q2 <- quantile(nx, 0.5)
+q3 <- quantile(nx, 0.75)
+```
+
+
+Minimum et maximum affectee a `min`, `max`
+
+```{r}
+min <- min(nx)
+max <- max(nx)
+```
+
+Vérifier que la taille de l'échantillon x vaut 124 et sa médiane vaut 3780.
+
+```{r}
+length(nx)
+median(nx)
+```
+
+Renseigner les résultats dans un tableau (généré par le "tronçon" nommé table dans le script Rmd solution proposé).
+
+```{r}
+table <- data.frame("Moyenne" = mx, "Variance empirique" = vx, "Variance empirique corrigee" = vex, "Ecart type empirique corrigee" = sdex, "Quartile 1" = q1, "Quartile 2" = q2, "Quartile 3" = q3, "Minimum" = min, "Maximum" = max)
+table
+```
+
+Interpréter et commenter les résultats obtenus.
+
+
+## Exercice 2
+
+Les données utilisées ici sont disponibles dans la librairie de base de R : mcars (voir l'aide de R pour la description de ces données).
+1. La variable `carb` est-elle à traiter comme une variable discrète ou continue (justifier) ? Quel type de graphique utilise-t-on pour en représenter la distribution observée ?
+
+carb: Number of carburetors
+
+La variable `carb` est une variable discrète. On utilise un histogramme pour en représenter la distribution observée.
+
+2. Extraire les échantillons de `carb` pour les voitures automatiques (am==0) et de `carb `pour les voitures manuelles. Dans une fenêtre graphique coupée en deux morceaux (1 ligne et deux colonnes), représenter à gauche la distribution observée de carb pour les automatiques et à droite celle de carb pour les manuelles. Indiquer titre, légendes (en abscisse et en ordonnée) et marquer d'un point rouge sur chacun des graphiques la position de la moyenne de l'échantillon. 
+
+```{r}
+am0 <- subset(mtcars, am == 0)
+am1 <- subset(mtcars, am == 1)
+```
+
+```{r}
+hist(am0$carb, main = "carb pour voitures automatiques", xlab = "carb", ylab = "nombre voitures", col = "red")
+
+hist(am1$carb, main = "carb pour voitures manuelles", xlab = "carb", ylab = "nombre voitures", col = "blue")
+```
+
+3. Les variables carb et am semblent-elles liées (justifier?)
+
+Oui, ils sont liés. On peut voir que les voitures manuelles ont plus de carburetors que les voitures automatiques.

@@ -1,0 +1,75 @@
+---
+title: "TP5 R_Markdown"
+author: "Yilun JIANG"
+date: "2023-02-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exercice 1
+### Question 1
+```{r}
+n <- 100
+p <- 0.45
+x <- rbinom(n, 1, p)
+summary(x)
+```
+
+### Question 2
+```{r}
+cumsum(x)
+taille <- 1:n
+suitemoy <- cumsum(x) / taille
+summary(suitemoy)
+```
+
+### Question 3
+```{r, echo=FALSE}
+plot(suitemoy, type = "l")
+abline(h = p, col = "red")
+```
+
+## Exercice 3
+
+### Question 1
+```{r}
+mu <- -2
+sigma <- 2
+n <- 5
+x <- rnorm(n, mu, sigma)
+moyx <- mean(x)
+summary(moyx)
+```
+
+### Question 2
+```{r}
+y <- rnorm(n, mu, sigma)
+moyy <- mean(y)
+rbind(x, y) -> M
+rowMeans(M)
+```
+
+### Question 3
+```{r}
+N <- 1000
+Mdata <- matrix(rnorm(n * N, mu, sigma), ncol = n, byrow = T)
+dim(Mdata)
+```
+
+### Question 4
+```{r}
+moyennes <- rowMeans(Mdata)
+apply(Mdata, MARGIN = 1, mean)
+summary(moyennes)
+```
+
+### Question 5
+```{r}
+mean(moyennes)
+sd(moyennes) * sqrt((length(moyennes) - 1) / length(moyennes))
+sd(moyennes)
+```
+

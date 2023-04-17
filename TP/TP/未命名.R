@@ -1,0 +1,10 @@
+nx <- read.csv("diamantsPurs.csv")
+mx <- mean(nx)
+vx <- var(nx)
+vex <- var(nx, na.rm = TRUE)
+sdex <- sqrt(vex)
+q1 <- quantile(nx, 0.25)
+q2 <- quantile(nx, 0.5)
+q3 <- quantile(nx, 0.75)
+min <- min(nx)
+
